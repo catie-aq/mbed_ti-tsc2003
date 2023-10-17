@@ -48,11 +48,21 @@ public:
 
     TSC2003IPWR(PinName sda, PinName scl, PinName irq, i2c_address i2c_address);
 
+    int read_touch(uint16_t *x, uint16_t *y, uint16_t *z1, uint16_t *z2);
+
+    void set_resolution(mode mode);
+
+    uint16_t temperature();
+
 private:
     I2C _i2c;
     i2c_address _i2c_address;
 
-    int i2c_write_command(function func, power_down power, mode mode);
+    mode _mode;
+
+    int8_t i2c_write_command(function func, power_down power, mode mode);
+
+    int8_t i2c_read_command(function func, power_down power, mode mode, uint16_t *ret);
 };
 
 } // namespace sixtron
