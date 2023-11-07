@@ -2,14 +2,17 @@
  * Copyright (c) 2023, CATIE
  * SPDX-License-Identifier: Apache-2.0
  */
-#ifndef CATIE_SIXTRON_TSC2003IPWR_H_
-#define CATIE_SIXTRON_TSC2003IPWR_H_
+#ifndef CATIE_SIXTRON_TSC2003_H_
+#define CATIE_SIXTRON_TSC2003_H_
 
 #include "mbed.h"
 
+/**
+ * @brief Namespace for all classes and functions related to the 6TRON project.
+ */
 namespace sixtron {
 
-class TSC2003IPWR {
+class TSC2003 {
 public:
     typedef enum {
         ADDRESS1 = (0x48), // A0 and A1 connected to GND
@@ -37,7 +40,7 @@ public:
     typedef enum {
         POWERDOWN_IRQON = 0,
         INTREFOFF_ADCON_IRQOFF = 1,
-        INTREFON_ADCOFF_IRQON = 1,
+        INTREFON_ADCOFF_IRQON = 2,
         INTREFON_ADCON_IRQOFF = 3
     } power_down;
 
@@ -46,7 +49,7 @@ public:
         _8BITS = 1
     } mode;
 
-    TSC2003IPWR(PinName sda, PinName scl, PinName irq, i2c_address i2c_address);
+    TSC2003(PinName sda, PinName scl, PinName irq, i2c_address i2c_address);
 
     int read_touch(uint16_t *x, uint16_t *y, uint16_t *z1, uint16_t *z2);
 
@@ -54,17 +57,24 @@ public:
 
     uint16_t temperature();
 
+    void attach_touch_irq(Callback<void()> func);
+
 private:
     I2C _i2c;
     i2c_address _i2c_address;
+    InterruptIn _touch_irq;
+
+    Callback<void()> _touch_callback;
 
     mode _mode;
 
     int8_t i2c_write_command(function func, power_down power, mode mode);
 
     int8_t i2c_read_command(function func, power_down power, mode mode, uint16_t *ret);
+
+    void touch_irq_handler();
 };
 
 } // namespace sixtron
 
-#endif // CATIE_SIXTRON_TSC2003IPWR_H_
+#endif // CATIE_SIXTRON_TSC2003_H_
